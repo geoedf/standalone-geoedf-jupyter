@@ -1,0 +1,69 @@
+proxy:
+  https:
+    enabled: true
+    hosts:
+      - <host>
+    letsencrypt:
+      contactEmail: <email>
+  service:
+    loadBalancerIP: <ip>
+hub:
+  db:
+    type: sqlite-pvc
+    pvc:
+      accessModes:
+        - ReadWriteOnce
+      storage: 1Gi
+  config:
+    Authenticator:
+      allowed_users:
+        - <username>
+    DummyAuthenticator:
+      password: <password>
+    JupyterHub:
+      authenticator_class: dummy
+  extraConfig:
+      custom-securityContext: |
+          c.KubeSpawner.privileged = True
+          c.KubeSpawner.pod_security_context = {
+             "privileged": "true"
+          }
+singleuser:
+  defaultUrl: "/lab"
+  image:
+    name: "geoedf/standalone"
+    tag: "ci4fairv11"
+  allowPrivilegeEscalation: true
+  extraEnv:
+    JUPYTERHUB_SINGLEUSER_APP: "jupyter_server.serverapp.ServerApp"
+    GRANT_SUDO: "yes"
+    NOTEBOOK_ARGS: "--allow-root"
+  uid: 0
+  #cmd: start-singleuser.sh
+  cmd: run.sh
+  extraAnnotations:
+    container.apparmor.security.beta.kubernetes.io/notebook: unconfined
+    container.seccomp.security.beta.kubernetes.io/notebook: unconfined
+  # very small limits for testing on small instances
+  memory:
+    guarantee: 4G
+    limit: 8G
+  cpu:
+    guarantee: 1
+    limit: 2
+  storage:
+    type: none
+  # default is 300s, sometimes Jetstream volumes are slow to attach
+  startTimeout: 600
+  # See https://github.com/zonca/jupyterhub-deploy-kubernetes-jetstream/issues/38
+  lifecycleHooks:
+    postStart:
+      exec:
+        command:
+           - "sh"
+           - "-c"
+           - >
+             chmod 700 .ssh;
+             chmod g-s .ssh;
+             chmod 600 .ssh/*;
+             exit 0

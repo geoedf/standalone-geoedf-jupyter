@@ -6,7 +6,7 @@ RUN mkdir /images && \
     chown jovyan: /images && \
     chmod 755 /images
 
-RUN pip install hpccm nbgitpuller
+RUN pip install hpccm nbgitpuller geopandas folium
 
 USER ${NB_UID}
 

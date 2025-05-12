@@ -32,7 +32,7 @@ singleuser:
   defaultUrl: "/lab"
   image:
     name: "geoedf/standalone"
-    tag: "ci4fairv11"
+    tag: "ci4fairv12"
   allowPrivilegeEscalation: true
   extraEnv:
     JUPYTERHUB_SINGLEUSER_APP: "jupyter_server.serverapp.ServerApp"
